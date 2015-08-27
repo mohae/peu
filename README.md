@@ -1,6 +1,6 @@
 Peu
 =====
-little
+un peu: a little
 
 ## About
 Peu makes things smaller, hopefully.
