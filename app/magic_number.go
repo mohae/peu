@@ -2,6 +2,9 @@ package app
 
 import (
 	"bytes"
+	"encoding/binary"
+	"errors"
+	"fmt"
 	"io"
 )
 
@@ -27,13 +30,25 @@ var (
 
 // getFileFormat tries to match up the data in the Reader to a supported
 // magic number, if a match isn't found, UnsupportedFmt is returned
-func getFileFormat(r io.ReaderAt) Format {
+func getFileFormat(r io.ReaderAt) (Format, error) {
 	h := make([]byte, 8, 8) // 8 is minimum cap of a byte slice so...
 	// Reat the first 8 bytes since that's where most magic numbers are
 	r.ReadAt(h, 0)
-	// for the byte comparison, use only the parts we need
-	if bytes.Equal(headerLZ4, h[0:4]) {
-		return LZ4
+	var h32 uint32
+	// check for lz4
+	hbuf := bytes.NewReader(headerLZ4)
+	err := binary.Read(hbuf, binary.LittleEndian, &h32)
+	if err != nil {
+		return Unsupported, fmt.Errorf("error while checking if input matched LZ4's magic number: %s", err)
 	}
-	return Unsupported
+	var m32 uint32
+	mbuf := bytes.NewBuffer(headerLZ4)
+	err = binary.Read(mbuf, binary.LittleEndian, &m32)
+	if err != nil {
+		return Unsupported, fmt.Errorf("error while converting LZ4 magic number for comparison: %s", err)
+	}
+	if h32 == m32 {
+		return LZ4, nil
+	}
+	return Unsupported, errors.New("unsupported format: input format is not known")
 }

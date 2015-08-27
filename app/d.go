@@ -29,9 +29,9 @@ func DToFile(fname string) error {
 		return err
 	}
 	// check its format
-	format := getFileFormat(src)
-	if format == Unsupported {
-		return fmt.Errorf("%s's format is unsupported", fname)
+	format, err := getFileFormat(src)
+	if err != nil {
+		return fmt.Errorf("%s: %s", fname, err)
 	}
 	dFname, err := dOutFile(fname)
 	// open output file
@@ -39,8 +39,12 @@ func DToFile(fname string) error {
 	if err != nil {
 		return err
 	}
-	// extract
-	err = dlz4(dst, src)
+	switch format {
+	case LZ4:
+		// extract
+		err = dlz4(dst, src)
+		return err
+	}
 	return nil
 }
 
