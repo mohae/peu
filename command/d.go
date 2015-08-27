@@ -57,7 +57,7 @@ func (c *DCommand) Run(args []string) int {
 }
 
 // Synopsis provides a precis of the hello command.
-func (c *CCommand) Synopsis() string {
+func (c *DCommand) Synopsis() string {
 	ret := `Compresses files using the specified algorithm
 `
 	return ret
