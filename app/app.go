@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -37,4 +38,31 @@ func fileParts(s string) (dir string, base string) {
 		base = strings.TrimSuffix(base, ext)
 	}
 	return dir, base
+}
+
+// outFile creates the output filename. The output filename's separator is
+// normalized to the os.Separator. Empty filenames return "", empty string.
+//
+// If the filename has an extension, it will be replaced with the passed
+// extension. If it does not have an extension, it will be appended with the
+// passed extension.
+//
+// If an output directory was specified, this will replace the file's
+// directory, if it has one.
+func outFile(s, ext string) string {
+	if s == "" {
+		return ""
+	}
+	dir, fname := fileParts(s)
+	// see if there is an output dir specified; if so override the current dir info
+	odir := contour.GetString(OutputDir)
+	if odir != "" {
+		dir = odir
+	}
+	// normalize ext to .ext
+	if !strings.HasPrefix(ext, ".") && ext != "" {
+		ext = fmt.Sprintf(".%s", ext)
+	}
+	// add the extension to the filename
+	return filepath.Join(filepath.FromSlash(dir), fmt.Sprintf("%s%s", fname, ext))
 }
