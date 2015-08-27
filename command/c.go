@@ -40,6 +40,7 @@ func (c *CCommand) Run(args []string) int {
 	contour.SetUsage(func() { c.UI.Output(c.Help()) })
 	// Filter the flags from the args and update the config with them.
 	// The args remaining after being filtered are returned.
+	filteredArgs, err := contour.FilterArgs(args)
 	if err != nil {
 		c.UI.Error(err.Error())
 		return 1
@@ -55,10 +56,8 @@ func (c *CCommand) Run(args []string) int {
 }
 
 // Synopsis provides a precis of the hello command.
-func (c *HelloCommand) Synopsis() string {
-	ret := `Concatonates the list of words it recieved
-to 'Hello', applies any formatting required,
-and returns the result.
+func (c *CCommand) Synopsis() string {
+	ret := `Compresses files using the specified algorithm
 `
 	return ret
 }

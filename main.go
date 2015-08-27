@@ -16,7 +16,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"runtime"
 
 	"github.com/mohae/cli"
 	"github.com/mohae/peu/app"
@@ -41,8 +40,6 @@ func main() {
 func realMain() int {
 	// Get the command line args.
 	args := os.Args[1:]
-	// Initialize the application configuration.
-	app.SetCfg()
 	// Setup the args, Commands, and Help info.
 	cli := &cli.CLI{
 		Name:     app.Name,

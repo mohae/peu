@@ -23,11 +23,6 @@ func init() {
 				UI: ui,
 			}, nil
 		},
-		"d": func() (cli.Command, error) {
-			return &command.DCommand{
-				UI: ui,
-			}, nil
-		},
 		"version": func() (cli.Command, error) {
 			return &command.VersionCommand{
 				Name:              app.Name,
