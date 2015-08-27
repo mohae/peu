@@ -48,7 +48,7 @@ func fileParts(s string) (dir string, base string) {
 // The filename will be appended with the received extension.
 //
 // If an output directory was specified, this will replace the file's
-// directory, if it has one.
+// directory, if it has one; otherwise it will become the file's directory.
 func cOutFile(fname, ext string) (string, error) {
 	if fname == "" {
 		return "", errors.New("unable to create compression output filename: no filename received")
@@ -63,9 +63,29 @@ func cOutFile(fname, ext string) (string, error) {
 		dir = odir
 	}
 	// normalize ext to .ext
-	if !strings.HasPrefix(ext, ".") && ext != "" {
+	if !strings.HasPrefix(ext, ".") {
 		ext = fmt.Sprintf(".%s", ext)
 	}
 	// add the extension to the filename
 	return filepath.Join(filepath.FromSlash(dir), fmt.Sprintf("%s%s", fname, ext)), nil
+}
+
+// dOutFile creates the output filename for decompression. The output filename
+// is created by stripping the extension from it. If the received filename is
+// an empty string, an error will be returned.
+//
+// If an output directory was specified, this will replace the file's directory,
+// if it has one; otherwise it will become the file's directory.
+func dOutFile(fname string) (string, error) {
+	if fname == "" {
+		return "", errors.New("unable to create decompression output filename: no filename received")
+	}
+	dir, name := fileParts(fname)
+	// see if there is an output dir specified; if so overrid e the current dir info
+	odir := contour.GetString(OutputDir)
+	if odir != "" {
+		dir = odir
+	}
+	// return the finalized name
+	return filepath.Join(filepath.FromSlash(dir), name), nil
 }
