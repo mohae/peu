@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -40,20 +41,22 @@ func fileParts(s string) (dir string, base string) {
 	return dir, base
 }
 
-// outFile creates the output filename. The output filename's separator is
-// normalized to the os.Separator. Empty filenames return "", empty string.
+// cOutFile creates the output filename for compression. The output filename's
+// separator is normalized to the os.Separator. An error will occur if either
+// the filename or the extension is an empty string.
 //
-// If the filename has an extension, it will be replaced with the passed
-// extension. If it does not have an extension, it will be appended with the
-// passed extension.
+// The filename will be appended with the received extension.
 //
 // If an output directory was specified, this will replace the file's
 // directory, if it has one.
-func outFile(s, ext string) string {
-	if s == "" {
-		return ""
+func cOutFile(fname, ext string) (string, error) {
+	if fname == "" {
+		return "", errors.New("unable to create compression output filename: no filename received")
 	}
-	dir, fname := fileParts(s)
+	if ext == "" {
+		return "", errors.New("unable to create compression output filename: no extension received")
+	}
+	dir, fname := filepath.Split(fname)
 	// see if there is an output dir specified; if so override the current dir info
 	odir := contour.GetString(OutputDir)
 	if odir != "" {
@@ -64,5 +67,5 @@ func outFile(s, ext string) string {
 		ext = fmt.Sprintf(".%s", ext)
 	}
 	// add the extension to the filename
-	return filepath.Join(filepath.FromSlash(dir), fmt.Sprintf("%s%s", fname, ext))
+	return filepath.Join(filepath.FromSlash(dir), fmt.Sprintf("%s%s", fname, ext)), nil
 }

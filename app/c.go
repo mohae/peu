@@ -37,7 +37,10 @@ func clz4(files []string) (string, error) {
 			return "", err
 		}
 		defer srcF.Close()
-		fname := outFile(file, ".lz4")
+		fname, err := cOutFile(file, ".lz4")
+		if err != nil {
+			return "", err
+		}
 		// create the output file
 		dstF, err := os.OpenFile(fname, os.O_CREATE|os.O_WRONLY, 0755)
 		if err != nil {
