@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"strings"
 
+	contour "github.com/mohae/contour"
 	"github.com/pierrec/lz4"
 )
 
