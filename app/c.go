@@ -26,6 +26,35 @@ func C(parms []string) (msg string, err error) {
 	return msg, err
 }
 
+// cOutFile creates the output filename for compression. The output filename's
+// separator is normalized to the os.Separator. An error will occur if either
+// the filename or the extension is an empty string.
+//
+// The filename will be appended with the received extension.
+//
+// If an output directory was specified, this will replace the file's
+// directory, if it has one; otherwise it will become the file's directory.
+func cOutFile(fname, ext string) (string, error) {
+	if fname == "" {
+		return "", errors.New("unable to create compression output filename: no filename received")
+	}
+	if ext == "" {
+		return "", errors.New("unable to create compression output filename: no extension received")
+	}
+	dir, fname := filepath.Split(fname)
+	// see if there is an output dir specified; if so override the current dir info
+	odir := contour.GetString(OutputDir)
+	if odir != "" {
+		dir = odir
+	}
+	// normalize ext to .ext
+	if !strings.HasPrefix(ext, ".") {
+		ext = fmt.Sprintf(".%s", ext)
+	}
+	// add the extension to the filename
+	return filepath.Join(filepath.FromSlash(dir), fmt.Sprintf("%s%s", fname, ext)), nil
+}
+
 // clz4 compresses using lz4 compression
 func clz4(files []string) (string, error) {
 	var errMsg string

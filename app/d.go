@@ -48,6 +48,26 @@ func DToFile(fname string) error {
 	return nil
 }
 
+// dOutFile creates the output filename for decompression. The output filename
+// is created by stripping the extension from it. If the received filename is
+// an empty string, an error will be returned.
+//
+// If an output directory was specified, this will replace the file's directory,
+// if it has one; otherwise it will become the file's directory.
+func dOutFile(fname string) (string, error) {
+	if fname == "" {
+		return "", errors.New("unable to create decompression output filename: no filename received")
+	}
+	dir, name := fileParts(fname)
+	// see if there is an output dir specified; if so overrid e the current dir info
+	odir := contour.GetString(OutputDir)
+	if odir != "" {
+		dir = odir
+	}
+	// return the finalized name
+	return filepath.Join(filepath.FromSlash(dir), name), nil
+}
+
 func dlz4(dst io.Writer, src io.Reader) error {
 	lzr := lz4.NewReader(src)
 	_, err := io.Copy(dst, lzr)
