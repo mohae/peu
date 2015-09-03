@@ -6,9 +6,9 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 
 	contour "github.com/mohae/contour"
+	"github.com/mohae/magicnum"
 	"github.com/pierrec/lz4"
 )
 
@@ -37,12 +37,9 @@ func C(parms []string) (msg string, err error) {
 //
 // If an output directory was specified, this will replace the file's
 // directory, if it has one; otherwise it will become the file's directory.
-func cOutFile(fname, ext string) (string, error) {
+func cOutFile(fname string, format magicnum.Format) (string, error) {
 	if fname == "" {
 		return "", errors.New("unable to create compression output filename: no filename received")
-	}
-	if ext == "" {
-		return "", errors.New("unable to create compression output filename: no extension received")
 	}
 	dir, fname := filepath.Split(fname)
 	// see if there is an output dir specified; if so override the current dir info
@@ -50,12 +47,8 @@ func cOutFile(fname, ext string) (string, error) {
 	if odir != "" {
 		dir = odir
 	}
-	// normalize ext to .ext
-	if !strings.HasPrefix(ext, ".") {
-		ext = fmt.Sprintf(".%s", ext)
-	}
 	// add the extension to the filename
-	return filepath.Join(filepath.FromSlash(dir), fmt.Sprintf("%s%s", fname, ext)), nil
+	return filepath.Join(filepath.FromSlash(dir), fmt.Sprintf("%s%s", fname, format.Ext())), nil
 }
 
 // clz4 compresses using lz4 compression
@@ -68,26 +61,28 @@ func clz4(files []string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		defer srcF.Close()
-		fname, err := cOutFile(file, ".lz4")
+		fname, err := cOutFile(file, magicnum.LZ4)
 		if err != nil {
+			srcF.Close()
 			return "", err
 		}
 		// create the output file
 		dstF, err := os.OpenFile(fname, os.O_CREATE|os.O_WRONLY, 0755)
 		if err != nil {
+			srcF.Close()
 			return "", err
 		}
-		defer dstF.Close()
 		// create the lz4 writer
 		lzw := lz4.NewWriter(dstF)
-		defer lzw.Close()
-		_, err = io.Copy(lzw, srcF)
+		_, err := io.Copy(lzw, srcF)
 		if err != nil {
 			// errors get counted and aggregated
 			errMsg += fmt.Sprintf("\n%s", err)
 			errCnt++
 		}
+		lzw.Close()
+		srcF.Close()
+		dstF.Close()
 	}
 	if errCnt > 0 {
 		return fmt.Sprintf("%d files were processed\n%d were successfully compressed using lz4\n%d had errors\n", len(files), len(files)-errCnt, errCnt), fmt.Errorf("lz4 compression error(s): %s", errMsg)
