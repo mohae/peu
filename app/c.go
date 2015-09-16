@@ -74,7 +74,7 @@ func clz4(files []string) (string, error) {
 		}
 		// create the lz4 writer
 		lzw := lz4.NewWriter(dstF)
-		_, err := io.Copy(lzw, srcF)
+		_, err = io.Copy(lzw, srcF)
 		if err != nil {
 			// errors get counted and aggregated
 			errMsg += fmt.Sprintf("\n%s", err)
