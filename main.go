@@ -16,6 +16,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime/debug"
 
 	"github.com/mohae/cli"
 	"github.com/mohae/peu/app"
@@ -38,6 +39,13 @@ func main() {
 // enable/disable output, alter it, or alter its output locations. Everything
 // must go to stdout until then.
 func realMain() int {
+	f, err := os.Create("heap.dmp")
+	if err != nil {
+		fmt.Println(err)
+		return 1
+	}
+	defer f.Close()
+	debug.WriteHeapDump(f.Fd())
 	// Get the command line args.
 	args := os.Args[1:]
 	// Setup the args, Commands, and Help info.
