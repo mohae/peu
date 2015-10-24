@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	contour "github.com/mohae/contour"
-	"github.com/mohae/magicnum"
+	magicnum "github.com/mohae/magicnum/mcompress"
 	"github.com/pierrec/lz4"
 )
 
