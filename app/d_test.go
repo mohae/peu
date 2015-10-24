@@ -2,6 +2,8 @@ package app
 
 import (
 	"testing"
+
+	"github.com/mohae/contour"
 )
 
 func TestDOutFile(t *testing.T) {

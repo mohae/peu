@@ -41,6 +41,9 @@ func cOutFile(fname string, format magicnum.Format) (string, error) {
 	if fname == "" {
 		return "", errors.New("unable to create compression output filename: no filename received")
 	}
+	if format == magicnum.Unknown {
+		return "", errors.New("unable to create compression output filename: unknown output format")
+	}
 	dir, fname := filepath.Split(fname)
 	// see if there is an output dir specified; if so override the current dir info
 	odir := contour.GetString(OutputDir)

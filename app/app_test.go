@@ -2,8 +2,6 @@ package app
 
 import (
 	"testing"
-
-	"github.com/mohae/contour"
 )
 
 func TestFileParts(t *testing.T) {
