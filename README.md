@@ -1,6 +1,7 @@
 Peu
 =====
 [![Build Status](https://travis-ci.org/mohae/peu.png)](https://travis-ci.org/mohae/peu)
+
 un peu: a little
 
 ## About
