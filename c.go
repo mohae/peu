@@ -1,6 +1,7 @@
 package peu
 
 import (
+	"compress/gzip"
 	"io"
 
 	"github.com/mohae/magicnum/compress"
@@ -17,6 +18,8 @@ func Compress(format string, r io.Reader, w io.Writer) (int64, error) {
 	switch f {
 	case compress.LZ4:
 		return CompressLZ4(r, w)
+	case compress.GZip:
+		return CompressGZip(r, w)
 	default:
 		return 0, ErrUnsupported
 	}
@@ -28,6 +31,19 @@ func CompressLZ4(r io.Reader, w io.Writer) (int64, error) {
 	// create the lz4 writer
 	lzw := lz4.NewWriter(w)
 	n, err := io.Copy(lzw, r)
+	if err != nil {
+		// errors get counted and aggregated
+		return n, err
+	}
+	return n, nil
+}
+
+// CompressGzip compresses using gzip compression. Bytes read is returned along
+// with any non io.EOF error that may have occurred.
+func CompressGZip(r io.Reader, w io.Writer) (int64, error) {
+	// create the lz4 writer
+	c := gzip.NewWriter(w)
+	n, err := io.Copy(c, r)
 	if err != nil {
 		// errors get counted and aggregated
 		return n, err

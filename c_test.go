@@ -27,6 +27,11 @@ func TestCompress(t *testing.T) {
 			},
 			17, nil,
 		},
+		{
+			"gzip", ipsum,
+			[]byte{0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x00, 0xff},
+			17, nil,
+		},
 	}
 	for _, test := range tests {
 		r := bytes.NewReader(test.data)
