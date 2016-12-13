@@ -16,24 +16,27 @@ import (
 	"errors"
 	"io"
 
-	"github.com/mohae/magicnum/mcompress"
+	"github.com/mohae/magicnum/compress"
 )
 
-var ErrUnsupported = errors.New("unsupported compression format")
+var (
+	ErrUnsupported = errors.New("unsupported compression format")
+	ErrNoFormat    = errors.New("no compression format specified")
+)
 
 // CompressionFormat checks to see if the data in the provided reader uses
 // a supported compression format. If it does not, an UnsupportedErr is
 // returned.
-func CompressionFormat(r io.ReaderAt) (mcompress.Format, error) {
-	f, err := mcompress.GetFormat(r)
+func CompressionFormat(r io.ReaderAt) (compress.Format, error) {
+	f, err := compress.GetFormat(r)
 	if err != nil {
-		return mcompress.Unknown, err
+		return compress.Unknown, err
 	}
 	// see if the format is a supported on
 	switch f {
-	case mcompress.GZip:
+	case compress.GZip:
 		return f, nil
-	case mcompress.LZ4:
+	case compress.LZ4:
 		return f, nil
 	default:
 		return f, ErrUnsupported
