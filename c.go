@@ -43,6 +43,7 @@ func CompressLZ4(r io.Reader, w io.Writer) (int64, error) {
 func CompressGZip(r io.Reader, w io.Writer) (int64, error) {
 	// create the lz4 writer
 	c := gzip.NewWriter(w)
+	defer c.Close()
 	n, err := io.Copy(c, r)
 	if err != nil {
 		// errors get counted and aggregated
