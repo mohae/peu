@@ -36,6 +36,8 @@ func CompressionFormat(r io.ReaderAt) (compress.Format, error) {
 	switch f {
 	case compress.GZip:
 		return f, nil
+	case compress.BZip2: // only decompression is supported.
+		return f, nil
 	case compress.LZ4:
 		return f, nil
 	default:

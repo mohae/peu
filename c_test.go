@@ -38,6 +38,10 @@ func TestCompress(t *testing.T) {
 			},
 			17, nil,
 		},
+		{
+			"bzip2", ipsum,
+			nil, 17, ErrUnsupported,
+		},
 	}
 	for _, test := range tests {
 		r := bytes.NewReader(test.data)

@@ -1,6 +1,7 @@
 package peu
 
 import (
+	"compress/bzip2"
 	"compress/gzip"
 	"fmt"
 	"io"
@@ -26,6 +27,8 @@ func Decompress(r io.Reader, w io.Writer) (int64, error) {
 	switch f {
 	case compress.GZip:
 		return DecompressGZip(r, w)
+	case compress.BZip2:
+		return DecompressBZip2(r, w)
 	case compress.LZ4:
 		return DecompressLZ4(r, w)
 	default:
@@ -54,6 +57,19 @@ func DecompressGZip(r io.Reader, w io.Writer) (int64, error) {
 		return 0, err
 	}
 	defer d.Close()
+	n, err := io.Copy(w, d)
+	if err != nil {
+		fmt.Println(n, err)
+		return n, err
+	}
+	return n, nil
+}
+
+// DecompressBZip2 decompresses data compressed with bzip2 compression. Bytes
+// read is returned along with any non io.EOF error that may have occurred.
+func DecompressBZip2(r io.Reader, w io.Writer) (int64, error) {
+	// create the reader
+	d := bzip2.NewReader(r)
 	n, err := io.Copy(w, d)
 	if err != nil {
 		fmt.Println(n, err)
