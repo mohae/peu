@@ -51,3 +51,15 @@ func CompressGZip(r io.Reader, w io.Writer) (int64, error) {
 	}
 	return n, nil
 }
+
+// CompressionIsSupported returns if compression using the Format is supported.
+func CompressionIsSupported(f compress.Format) bool {
+	switch f {
+	case compress.LZ4:
+		return true
+	case compress.GZip:
+		return true
+	default:
+		return false
+	}
+}

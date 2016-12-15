@@ -3,6 +3,8 @@ package peu
 import (
 	"bytes"
 	"testing"
+
+	"github.com/mohae/magicnum/compress"
 )
 
 var ipsum = []byte(`Lorem ipsum dolor`)
@@ -63,6 +65,31 @@ func TestCompress(t *testing.T) {
 		}
 		if bytes.Compare(w.Bytes(), test.cdata) != 0 {
 			t.Errorf("%q: got %x; want %x", test.format, w.Bytes(), test.cdata)
+		}
+	}
+}
+
+func TestCompressionIsSupported(t *testing.T) {
+	tests := []struct {
+		compress.Format
+		t bool
+	}{
+		{compress.Unknown, false},
+		{compress.BZip2, false},
+		{compress.GZip, true},
+		{compress.LZ4, true},
+		{compress.Zip, false},
+		{compress.ZipEmpty, false},
+		{compress.ZipSpanned, false},
+		{compress.Tar, false},
+		{compress.Tar1, false},
+		{compress.Tar2, false},
+	}
+
+	for _, test := range tests {
+		b := CompressionIsSupported(test.Format)
+		if b != test.t {
+			t.Errorf("%s: got %t want %t", test.Format, b, test.t)
 		}
 	}
 }

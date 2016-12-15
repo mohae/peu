@@ -74,3 +74,28 @@ func TestDecompress(t *testing.T) {
 		}
 	}
 }
+
+func TestDecompressionIsSupported(t *testing.T) {
+	tests := []struct {
+		compress.Format
+		t bool
+	}{
+		{compress.Unknown, false},
+		{compress.BZip2, true},
+		{compress.GZip, true},
+		{compress.LZ4, true},
+		{compress.Zip, false},
+		{compress.ZipEmpty, false},
+		{compress.ZipSpanned, false},
+		{compress.Tar, false},
+		{compress.Tar1, false},
+		{compress.Tar2, false},
+	}
+
+	for _, test := range tests {
+		b := DecompressionIsSupported(test.Format)
+		if b != test.t {
+			t.Errorf("%s: got %t want %t", test.Format, b, test.t)
+		}
+	}
+}

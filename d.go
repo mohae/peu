@@ -77,3 +77,18 @@ func DecompressBZip2(r io.Reader, w io.Writer) (int64, error) {
 	}
 	return n, nil
 }
+
+// Returns if the format is supported for decompression.
+func DecompressionIsSupported(f compress.Format) bool {
+	switch f {
+	case compress.GZip:
+		return true
+	case compress.BZip2:
+		return true
+	case compress.LZ4:
+		return true
+	default:
+		return false
+	}
+
+}
