@@ -71,7 +71,7 @@ func (w *Worker) Compress() error {
 	close(ch)
 	wg.Wait()
 	if len(w.errs) == 0 {
-		fmt.Printf("%d files totaling %d bytes were successfully compressed\n", w.n, len(w.files))
+		fmt.Printf("%d files totaling %d bytes were successfully compressed\n", len(w.files), w.n)
 		return nil
 	}
 	fmt.Printf("%d files totaling %d bytes processed with %d errors:\n", len(w.files), w.n, len(w.errs))
@@ -84,7 +84,7 @@ func (w *Worker) Compress() error {
 // c does the actual compression work. It works until the channel has been
 // drained.
 func (w *Worker) c(ch chan string, wg *sync.WaitGroup) {
-	wg.Done()
+	defer wg.Done()
 	for {
 		v, ok := <-ch
 		if !ok {
