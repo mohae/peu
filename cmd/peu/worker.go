@@ -16,6 +16,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/mohae/magicnum/compress"
@@ -45,13 +47,12 @@ type Worker struct {
 // supported, either compress.Unknown or a peu.Unsupported error will be
 // returned.
 func (w *Worker) Work() error {
-	// make suer concurrency is at least 1
+	// make sure concurrency is at least 1
 	if w.concurrency < 1 {
 		w.concurrency = 1
 	}
 	if w.decompress {
-		return ErrProcess
-		//return w.Decompress()
+		return w.Decompress()
 	}
 	w.Format = compress.ParseFormat(w.format)
 	return w.Compress()
@@ -71,10 +72,10 @@ func (w *Worker) Compress() error {
 	close(ch)
 	wg.Wait()
 	if len(w.errs) == 0 {
-		fmt.Printf("%d files totaling %d bytes were successfully compressed\n", len(w.files), w.n)
+		fmt.Printf("compress: %d files totaling %d bytes were processed\n", len(w.files), w.n)
 		return nil
 	}
-	fmt.Printf("%d files totaling %d bytes processed with %d errors:\n", len(w.files), w.n, len(w.errs))
+	fmt.Printf("compress: %d files totaling %d bytes processed with %d errors:\n", len(w.files), w.n, len(w.errs))
 	for k, v := range w.errs {
 		fmt.Printf("\t%s: %s", k, v)
 	}
@@ -112,10 +113,86 @@ func (w *Worker) c(ch chan string, wg *sync.WaitGroup) {
 		dst.Close()
 		w.mu.Lock()
 		w.n += n
-		fmt.Println(n)
 		if err != nil {
 			w.errs[v] = err
 		}
 		w.mu.Unlock()
 	}
+}
+
+// Decompress manages the decompression process.
+func (w *Worker) Decompress() error {
+	var wg sync.WaitGroup
+	ch := make(chan string)
+	wg.Add(w.concurrency)
+	for i := 0; i < w.concurrency; i++ {
+		go w.d(ch, &wg)
+	}
+	for _, v := range w.files {
+		ch <- v
+	}
+	close(ch)
+	wg.Wait()
+	if len(w.errs) == 0 {
+		fmt.Printf("decompress: %d files totaling %d bytes were processed\n", len(w.files), w.n)
+		return nil
+	}
+	fmt.Printf("decomopress: %d files totaling %d bytes processed with %d errors:\n", len(w.files), w.n, len(w.errs))
+	for k, v := range w.errs {
+		fmt.Printf("\t%s: %s", k, v)
+	}
+	return ErrProcess
+}
+
+// d is the decompression worker. It works until the channel has been drained.
+func (w *Worker) d(ch chan string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for {
+		v, ok := <-ch
+		if !ok {
+			return
+		}
+		src, err := os.Open(v)
+		if err != nil {
+			w.mu.Lock()
+			w.errs[v] = err
+			w.mu.Unlock()
+			continue
+		}
+		// the output filename is assumed to be the filename - ext,
+		// e.g.:
+		//   sample.txt.gz would be sample.txt
+		//   sample.gz would be sample
+		dstName := stripExt(v)
+		// TODO use original files permissions? This would probably require
+		// platform specific code.
+		dst, err := os.OpenFile(dstName, os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0777)
+		if err != nil {
+			w.mu.Lock()
+			w.errs[v] = err
+			w.mu.Unlock()
+			src.Close()
+			continue
+		}
+		n, err := peu.Decompress(src, dst)
+		src.Close()
+		dst.Close()
+		w.mu.Lock()
+		w.n += n
+		if err != nil {
+			w.errs[v] = err
+		}
+		w.mu.Unlock()
+	}
+}
+
+// stripExt removes the final extension.
+//   example.txt.gz becomes example.txt
+//   example.gz becomes example
+//   dir1/example.csv.bz2 becomes dir1/example.csv
+func stripExt(n string) string {
+	ext := filepath.Ext(n)
+	dir, f := filepath.Split(n)
+	f = strings.TrimSuffix(f, ext)
+	return filepath.Join(dir, f)
 }

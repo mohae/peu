@@ -3,7 +3,6 @@ package peu
 import (
 	"compress/bzip2"
 	"compress/gzip"
-	"fmt"
 	"io"
 
 	"github.com/mohae/magicnum/compress"
@@ -59,7 +58,6 @@ func DecompressGZip(r io.Reader, w io.Writer) (int64, error) {
 	defer d.Close()
 	n, err := io.Copy(w, d)
 	if err != nil {
-		fmt.Println(n, err)
 		return n, err
 	}
 	return n, nil
@@ -72,7 +70,6 @@ func DecompressBZip2(r io.Reader, w io.Writer) (int64, error) {
 	d := bzip2.NewReader(r)
 	n, err := io.Copy(w, d)
 	if err != nil {
-		fmt.Println(n, err)
 		return n, err
 	}
 	return n, nil
