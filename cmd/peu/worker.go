@@ -49,15 +49,15 @@ func (w *Worker) Work() error {
 	if w.concurrency < 1 {
 		w.concurrency = 1
 	}
-	w.Format = compress.ParseFormat(w.format)
 	if w.decompress {
 		return ErrProcess
 		//return w.Decompress()
 	}
+	w.Format = compress.ParseFormat(w.format)
 	return w.Compress()
 }
 
-// Compress manages the workers doing the compression of the files.
+// Compress manages the compression process.
 func (w *Worker) Compress() error {
 	var wg sync.WaitGroup
 	ch := make(chan string)
@@ -81,8 +81,7 @@ func (w *Worker) Compress() error {
 	return ErrProcess
 }
 
-// c does the actual compression work. It works until the channel has been
-// drained.
+// c is the compression worker. It works until the channel has been drained.
 func (w *Worker) c(ch chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
