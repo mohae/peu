@@ -10,7 +10,7 @@ Peu is a simple compression tool for compressing and decompressing files. Peu ne
 ## Usage
 Peu is written in Go and should work on any supported platform and architecture combination.
 
-To see uasage and flag information: 
+To see usage and flag information: 
 
     $ peu -h
 
