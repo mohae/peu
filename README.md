@@ -7,7 +7,7 @@ un peu: a little
 ## About
 Peu makes things smaller, hopefully. Peu can also decompress a given stream if it's compression format is supported. This can either be done by checking the magic number or by using the appropriate method. When the stream ends, the operation ends. 
 
-Just provide Peu with an io.Reader and io.Writer and Peu will handle the rest for you. For compression, either call `Compress` and specify the compression format or call the correct compression function. For decompression, just call `Decompress`; it will figure out the compression format used, if it is a supported one.
+Just provide Peu with an `io.Reader` and an `io.Writer`; the rest will be handled for you. For compression, either call `Compress` and specify the compression format or call the correct compression function. For decompression, just call `Decompress`; it will figure out the compression format used, if it is a supported one. If the compression format is already known, the format specific Decompress funcs can be called directly too.
 
 Peu is not designed to work with archives.  For that, there's [carchivum](https://github.com/mohae/carchivum)
 
