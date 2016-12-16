@@ -15,14 +15,20 @@ package main
 import (
 	"flag"
 	"os"
+	"runtime"
 )
 
-var (
-	worker = Worker{errs: make(map[string]error), format: "gzip"}
-)
+var worker Worker
 
 func init() {
+	worker = Worker{
+		concurrency: runtime.NumCPU(), // default to number of cpus
+		errs:        make(map[string]error),
+		format:      "gzip",
+	}
+
 	flag.StringVar(&worker.format, "f", worker.format, "compression format to use")
+	flag.IntVar(&worker.concurrency, "p", worker.concurrency, "max concurrency level")
 	flag.BoolVar(&worker.decompress, "d", false, "decompress the source")
 }
 
