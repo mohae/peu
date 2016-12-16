@@ -1,6 +1,6 @@
 Peu
 =====
-[![Build Status](https://travis-ci.org/mohae/peu.png)](https://travis-ci.org/mohae/peu)
+[![GoDoc](https://godoc.org/github.com/mohae/peu?status.svg)](https://godoc.org/github.com/mohae/peu)
 
 un peu: a little
 
